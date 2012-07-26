@@ -58,6 +58,7 @@ class Cars extends CI_Controller {
 	    
 	    // Recover the data from _POST. Can we use set_value()?
 	    $data['title'] = 'Add a new car';
+	    $data['id'] = $_POST['id'];
 	    $data['car_desc'] = $_POST['car_desc'];
 	    $data['car_year'] = $_POST['car_year'];
 	    $data['car_make'] = $_POST['car_make'];
