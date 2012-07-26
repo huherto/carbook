@@ -1,10 +1,14 @@
 <?php
+/*
+ * Implement CRUD operations for cars.
+ */ 
 class Cars extends CI_Controller {
 
 	public function __construct()
 	{
 		parent::__construct();
 		
+		// I imagine these can go somewhere else.
 		$config['hostname'] = "localhost";
 		$config['username'] = "";
 		$config['password'] = "";
@@ -17,6 +21,9 @@ class Cars extends CI_Controller {
 		$this->load->model('cars_model', '', $config);
 	}
 
+	/*
+	 * List all the cars.
+	 */
 	public function index()
 	{
 	  $this->load->helper('url');
@@ -29,11 +36,16 @@ class Cars extends CI_Controller {
 	  $this->load->view('templates/footer');
 	}
 	
+	/*
+	 * Save information of a car. It can be used to insert if it is a 
+	 * new record or to update if it is an existing record.
+	 */
 	public function save()
 	{
 	  $this->load->helper(array('form', 'url'));
 	  $this->load->library('form_validation');
 	  
+	  // Validate the form
 	  $this->form_validation->set_error_delimiters('<div class="error">', '</div>');	  
 	  $this->form_validation->set_rules('car_desc', 'Description', 'required');
 		$this->form_validation->set_rules('car_year', 'Year', 'exact_length[4]|numeric|required');
@@ -41,18 +53,24 @@ class Cars extends CI_Controller {
 		$this->form_validation->set_rules('car_model', 'Model', 'required');
 
 	  if ($this->form_validation->run() == FALSE) {
+	    
+	    // There was a validation error, we need to go back to the edit view.
+	    
+	    // Recover the data from _POST. Can we use set_value()?
 	    $data['title'] = 'Add a new car';
 	    $data['car_desc'] = $_POST['car_desc'];
 	    $data['car_year'] = $_POST['car_year'];
 	    $data['car_make'] = $_POST['car_make'];
 	    $data['car_model'] = $_POST['car_model'];
+	    
 	    $this->load->view('templates/header', $data);
 	    $this->load->view('cars/edit', $data);
 	    $this->load->view('templates/footer');
 	  }
 	  else {
 	    
-	    $id = $this->input->post('id');
+	    // No validation errors. We can attempt to save the record.
+	    
 	    $record = array(
 	      'car_desc' => $this->input->post('car_desc'),
 	      'car_year' => $this->input->post('car_year'),
@@ -60,13 +78,18 @@ class Cars extends CI_Controller {
 	      'car_model' => $this->input->post('car_model')
 	      );
 	    
+	    // id comes in a hidden field.
+	    $id = $this->input->post('id');
 	    if ($id == '') {
+	      // New record.
 	      $this->cars_model->insert($record);
 	    }
 	    else {
+	      // Existing record.
 	      $this->cars_model->update($id, $record);
 	    }
 
+	    // Tell the user that it was saved successfully.
 	    $data['title'] = 'Car saved';
 	    $this->load->view('templates/header', $data);
 	    $this->load->view('cars/saved', $data);
@@ -74,6 +97,9 @@ class Cars extends CI_Controller {
 	  }
 	}
 
+	/*
+	 * Display a car with id = $car_id
+	 */
 	public function view($car_id)
 	{
 	  $this->load->helper('url');
@@ -90,9 +116,14 @@ class Cars extends CI_Controller {
 	  $this->load->view('templates/footer');
 	}	
 	
+	/*
+	 * Show the view to edit a car with id = $car_id
+	 */
 	public function edit($car_id)
 	{
 	  $this->load->helper('url');
+
+	  // Fetch the record for this car.
  	  $cars_item = $this->cars_model->get_cars($car_id);
 
 	  if (empty($cars_item)) {
@@ -109,11 +140,15 @@ class Cars extends CI_Controller {
 	  $this->load->view('templates/footer');
 	}
 	
+	/*
+	 * Show the view to add a new car. 
+	 */
 	public function new_car()
 	{
 	  $this->load->helper(array('form', 'url'));
 	  $this->load->library('form_validation');
 	  
+	  // Set up the default values.
 	  $data['id'] = "";
 	  $data['title'] = 'Add a new car';
 	  $data['car_desc'] = "";

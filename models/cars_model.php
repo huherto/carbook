@@ -1,10 +1,21 @@
 <?php
+
+/*
+ * This is a gateway for the Cars table.
+ */
 class Cars_model extends CI_Model {
 
+  /*
+   * Constructor.
+   */
 	public function __construct()	{
 		$this->load->database();
 	}
 	
+  /*
+   * Returns the car with id = $car_id 
+   * Or returns all the cars.
+   */
 	public function get_cars($car_id = FALSE)	{
 	  if ($car_id === FALSE)
 	  {
@@ -16,6 +27,9 @@ class Cars_model extends CI_Model {
 	  return $query->row_array();
 	}
 	
+  /*
+   * Insert a new record.
+   */
 	public function insert($record) {
 	  
 	  $this->db->set($record);
@@ -23,6 +37,9 @@ class Cars_model extends CI_Model {
 	  
 	}
 	
+  /*
+   * Update the record with id = $id.
+   */
 	public function update($id, $record) {
 	  
 	  $this->db->where('id', $id);

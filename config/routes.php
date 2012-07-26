@@ -42,7 +42,6 @@ $route['cars/edit/(:any)'] = 'cars/edit/$1';
 $route['cars/view/(:any)'] = 'cars/view/$1';
 $route['cars/new/0'] = 'cars/new_car';
 $route['cars/save'] = 'cars/save';
-# $route['cars/(:any)'] = 'cars/view/$1';
 $route['cars'] = 'cars';
 $route['(:any)'] = 'pages/view/$1';
 $route['default_controller'] = 'pages/view';
