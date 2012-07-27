@@ -36,6 +36,21 @@ class Cars extends CI_Controller {
 	  $this->load->view('templates/footer');
 	}
 	
+	private function re_edit()
+	{
+	    // Recover the data from _POST. Can we use set_value()?
+	    $data['title'] = 'Add a new car';
+	    $data['id'] = $_POST['id'];
+	    $data['car_desc'] = $_POST['car_desc'];
+	    $data['car_year'] = $_POST['car_year'];
+	    $data['car_make'] = $_POST['car_make'];
+	    $data['car_model'] = $_POST['car_model'];
+	    
+	    $this->load->view('templates/header', $data);
+	    $this->load->view('cars/edit', $data);
+	    $this->load->view('templates/footer');
+	}
+	
 	/*
 	 * Save information of a car. It can be used to insert if it is a 
 	 * new record or to update if it is an existing record.
@@ -53,49 +68,41 @@ class Cars extends CI_Controller {
 		$this->form_validation->set_rules('car_model', 'Model', 'required');
 
 	  if ($this->form_validation->run() == FALSE) {
-	    
 	    // There was a validation error, we need to go back to the edit view.
-	    
-	    // Recover the data from _POST. Can we use set_value()?
-	    $data['title'] = 'Add a new car';
-	    $data['id'] = $_POST['id'];
-	    $data['car_desc'] = $_POST['car_desc'];
-	    $data['car_year'] = $_POST['car_year'];
-	    $data['car_make'] = $_POST['car_make'];
-	    $data['car_model'] = $_POST['car_model'];
-	    
-	    $this->load->view('templates/header', $data);
-	    $this->load->view('cars/edit', $data);
-	    $this->load->view('templates/footer');
+	    $this->re_edit();
+	    return;
 	  }
-	  else {
-	    
-	    // No validation errors. We can attempt to save the record.
-	    
-	    $record = array(
-	      'car_desc' => $this->input->post('car_desc'),
-	      'car_year' => $this->input->post('car_year'),
-	      'car_make' => $this->input->post('car_make'),
-	      'car_model' => $this->input->post('car_model')
-	      );
-	    
-	    // id comes in a hidden field.
-	    $id = $this->input->post('id');
-	    if ($id == '') {
-	      // New record.
-	      $this->cars_model->insert($record);
-	    }
-	    else {
-	      // Existing record.
-	      $this->cars_model->update($id, $record);
-	    }
+	  	  	    
+    // No validation errors. We can attempt to save the record.
+    $record = array(
+      'car_desc' => $this->input->post('car_desc'),
+      'car_year' => $this->input->post('car_year'),
+      'car_make' => $this->input->post('car_make'),
+      'car_model' => $this->input->post('car_model')
+      );
+    
+    // id comes in a hidden field.
+    $id = $this->input->post('id');
+    if ($id == '') {
+      // New record.
+      $id = $this->cars_model->insert($record);
+    }
+    else {
+      // Existing record.
+      $this->cars_model->update($id, $record);
+    }
+    
+    if (isset($_FILES['userfile']) && !$this->upload_image($id)) {
+        $_POST['id'] = $id;
+        $this->re_edit();
+        return;
+    }
 
-	    // Tell the user that it was saved successfully.
-	    $data['title'] = 'Car saved';
-	    $this->load->view('templates/header', $data);
-	    $this->load->view('cars/saved', $data);
-	    $this->load->view('templates/footer');
-	  }
+    // Tell the user that it was saved successfully.
+    $data['title'] = 'Car saved';
+    $this->load->view('templates/header', $data);
+    $this->load->view('cars/saved', $data);
+    $this->load->view('templates/footer');
 	}
 
 	/*
@@ -117,8 +124,31 @@ class Cars extends CI_Controller {
 	  $this->load->view('templates/footer');
 	}	
 	
+	function upload_image($id)
+	{
+	  
+	  $x = explode('.', $_FILES['userfile']['name']);
+	  $file_name = "car$id.".end($x);
+	  log_message('debug', "file_name=$file_name");
+	  
+	  //$upload_path = '/var/www/html/uploads/';
+	  $upload_path = getcwd() . "/" . APPPATH . "user_images";
+	  log_message('debug', "upload_path=$upload_path");
+	  
+	  $config['upload_path'] = $upload_path;
+	  $config['allowed_types'] = 'gif|jpg|png';
+		$config['max_size']	= '100';
+		$config['max_width']  = '1024';
+		$config['max_height']  = '768';
+		$config['file_name'] = $file_name;
+
+		$this->load->library('upload', $config);
+
+		return $this->upload->do_upload('userfile');
+	}
+	
 	/*
-	 * Show the view to edit a car with id = $car_id
+	 * Display the view to edit a car with id = $car_id
 	 */
 	public function edit($car_id)
 	{
@@ -133,6 +163,7 @@ class Cars extends CI_Controller {
 
 	  $this->load->helper(array('form', 'url'));
 	  $this->load->library('form_validation');
+		$this->load->library('upload');
 	  
 	  $cars_item['title'] = 'Edit car';
  
@@ -142,7 +173,7 @@ class Cars extends CI_Controller {
 	}
 	
 	/*
-	 * Show the view to add a new car. 
+	 * Display the view to add a new car. 
 	 */
 	public function new_car()
 	{

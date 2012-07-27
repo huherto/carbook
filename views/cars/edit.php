@@ -1,5 +1,5 @@
 <?php echo validation_errors(); ?>
-<?php echo form_open('cars/save'); ?>
+<?php echo form_open_multipart('cars/save'); ?>
   <?php echo form_hidden('id', $id) ?>
   <table>
     <tr>
@@ -24,6 +24,14 @@
       <th>Model:</th>
       <td>
         <?php echo form_input(array('name' => 'car_model', 'value' => $car_model, 'size' => 20)) ?>
+      </td>
+    </tr>
+    <tr>
+      <th>Image file:</th>
+      <td>
+        <img src="<?php echo base_url("application/user_images/car$id.jpg")?>" />
+        <input type="file" name="userfile" size="20" />
+        <?php echo $this->upload->display_errors() ?>
       </td>
     </tr>
     <tr><td><input type="submit" name="save" value="Save" /></td></tr>

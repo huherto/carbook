@@ -35,6 +35,8 @@ class Cars_model extends CI_Model {
 	  $this->db->set($record);
 	  $this->db->insert('cars');
 	  
+	  return $this->db->insert_id();
+	  
 	}
 	
   /*
